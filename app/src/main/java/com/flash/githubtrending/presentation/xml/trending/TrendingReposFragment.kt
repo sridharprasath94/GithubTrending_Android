@@ -59,7 +59,7 @@ class TrendingReposFragment :
         adapter.setOnItemClickListener { repo ->
             val action =
                 TrendingReposFragmentDirections
-                    .actionTrendingToDetails(repo.fullName)
+                    .actionTrendingToDetails(repo)
 
             findNavController().navigate(action)
         }

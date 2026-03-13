@@ -16,16 +16,18 @@ data class RepoDto(
     @SerializedName("stargazers_count") val stars: Int,
     val forks: Int,
     val language: String?,
+    @SerializedName("html_url") val htmlUrl: String,
     val owner: OwnerDto
 )
 
 data class OwnerDto(
     @SerializedName("login") val login: String,
-    @SerializedName("avatar_url") val avatarUrl: String
+    @SerializedName("avatar_url") val avatarUrl: String,
+    @SerializedName("html_url") val htmlUrl: String
 )
 
 /**
- * DTO -> Domain mapping (Swift-style extension equivalent)
+ * DTO
  */
 fun RepoDto.toDomain(isFavorite: Boolean = false): Repo {
     return Repo(
@@ -38,6 +40,8 @@ fun RepoDto.toDomain(isFavorite: Boolean = false): Repo {
         language = language,
         ownerName = owner.login,
         ownerAvatarUrl = owner.avatarUrl,
+        ownerHtmlUrl = owner.htmlUrl,
+        repoHtmlUrl = htmlUrl,
         isFavorite = isFavorite
     )
 }

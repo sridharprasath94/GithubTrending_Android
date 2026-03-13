@@ -15,5 +15,7 @@ data class RepoEntity(
     val language: String?,
     val ownerName: String,
     val ownerAvatarUrl: String?,
+    val ownerHtmlUrl: String,
+    val repoHtmlUrl: String,
     val isFavorite: Boolean
 )

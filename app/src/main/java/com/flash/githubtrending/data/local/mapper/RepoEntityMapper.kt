@@ -15,6 +15,8 @@ fun RepoEntity.toDomain(): Repo {
         language = language,
         ownerName = ownerName,
         ownerAvatarUrl = ownerAvatarUrl,
+        ownerHtmlUrl = ownerHtmlUrl,
+        repoHtmlUrl = repoHtmlUrl,
         isFavorite = isFavorite
     )
 }
@@ -30,6 +32,8 @@ fun Repo.toEntity(): RepoEntity {
         language = language,
         ownerName = ownerName,
         ownerAvatarUrl = ownerAvatarUrl,
+        ownerHtmlUrl = ownerHtmlUrl,
+        repoHtmlUrl = repoHtmlUrl,
         isFavorite = isFavorite
     )
 }

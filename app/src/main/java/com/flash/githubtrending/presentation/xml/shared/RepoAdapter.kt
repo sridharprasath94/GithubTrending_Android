@@ -25,7 +25,6 @@ class RepoAdapter(private val enableFavoritesIcon: Boolean = true) :
         fun bind(repo: Repo) {
             binding.repoName.text = repo.fullName
 
-
             if (enableFavoritesIcon) {
                 val iconRes =
                     if (repo.isFavorite)
