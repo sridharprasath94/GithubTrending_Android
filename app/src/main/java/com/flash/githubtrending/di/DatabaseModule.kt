@@ -3,7 +3,6 @@ package com.flash.githubtrending.di
 import android.content.Context
 import androidx.room.Room
 import com.flash.githubtrending.data.local.AppDatabase
-import com.flash.githubtrending.data.local.dao.FavoriteDao
 import com.flash.githubtrending.data.local.dao.RepoDao
 import com.flash.githubtrending.data.local.migrations.MIGRATION_1_2
 import dagger.Module
@@ -31,8 +30,4 @@ object DatabaseModule {
     @Provides
     fun provideRepoDao(db: AppDatabase): RepoDao =
         db.repoDao()
-
-    @Provides
-    fun provideFavoriteDao(db: AppDatabase): FavoriteDao =
-        db.favoriteDao()
 }

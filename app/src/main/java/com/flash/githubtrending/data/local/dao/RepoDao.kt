@@ -19,6 +19,21 @@ interface RepoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRepos(repos: List<RepoEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(repo: RepoEntity)
+
+    @Query("DELETE FROM repos WHERE id = :id")
+    suspend fun delete(id: Long)
+
     @Query("DELETE FROM repos")
     suspend fun clearRepos()
+
+    @Query("SELECT id FROM repos WHERE isFavorite = 1")
+    suspend fun getFavoriteIds(): List<Long>
+
+    @Query("SELECT * FROM repos WHERE isFavorite = 1")
+    fun observeFavoriteRepos(): Flow<List<RepoEntity>>
+
+    @Query("UPDATE repos SET isFavorite = NOT isFavorite WHERE id = :id")
+    suspend fun toggleFavorite(id: Long)
 }

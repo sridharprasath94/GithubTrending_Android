@@ -14,5 +14,6 @@ data class RepoEntity(
     val forks: Int,
     val language: String?,
     val ownerName: String,
-    val ownerAvatarUrl: String?
+    val ownerAvatarUrl: String?,
+    val isFavorite: Boolean
 )
