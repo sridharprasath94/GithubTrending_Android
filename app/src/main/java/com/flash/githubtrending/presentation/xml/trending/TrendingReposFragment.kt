@@ -2,6 +2,7 @@ package com.flash.githubtrending.presentation.xml.trending
 
 
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -93,7 +94,7 @@ class TrendingReposFragment :
 
         adapter.setOnItemClickListener { repo ->
             val action =
-                TrendingReposFragmentDirections.Companion
+                TrendingReposFragmentDirections
                     .actionTrendingToDetails(repo.fullName)
 
             findNavController().navigate(action)
@@ -108,6 +109,7 @@ class TrendingReposFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
+                    Log.d("SridharTrendingReposFragment", "Received UI state: ${state.repos.size}")
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE

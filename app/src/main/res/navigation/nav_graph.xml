@@ -20,6 +20,10 @@
     </fragment>
 
     <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.flash.githubtrending.presentation.xml.favorites.FavoriteReposFragment" />
+
+    <fragment
         android:id="@+id/detailsFragment"
         android:name="com.flash.githubtrending.presentation.xml.details.RepoDetailsFragment">
         <argument

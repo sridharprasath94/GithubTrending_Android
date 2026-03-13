@@ -1,5 +1,6 @@
 package com.flash.githubtrending.presentation.common.trending
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flash.githubtrending.core.Result
@@ -47,6 +48,7 @@ class TrendingReposViewModel @Inject constructor(
             _error
         ) { trending, searchResults, isLoading, error ->
 
+            Log.d("SridharTrendingReposViewModel", "Combining UI state: isLoading=$isLoading, error=$error, trendingCount=${trending.size}, searchResultsCount=${searchResults?.size ?: 0}")
             val baseList = searchResults ?: trending
 
             TrendingReposUiState(
