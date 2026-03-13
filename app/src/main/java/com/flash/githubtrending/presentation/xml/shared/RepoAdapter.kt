@@ -1,4 +1,4 @@
-package com.flash.githubtrending.presentation.xml.trending
+package com.flash.githubtrending.presentation.xml.shared
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

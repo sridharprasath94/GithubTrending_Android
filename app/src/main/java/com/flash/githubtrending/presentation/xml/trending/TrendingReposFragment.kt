@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentTrendingBinding
 import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
+import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.launch
