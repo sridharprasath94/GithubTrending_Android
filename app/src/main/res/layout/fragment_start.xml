@@ -11,7 +11,5 @@
         android:text="Open Trending Repos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/primary"
-        android:textColor="@color/on_primary"
         app:cornerRadius="24dp"/>
 </LinearLayout>
