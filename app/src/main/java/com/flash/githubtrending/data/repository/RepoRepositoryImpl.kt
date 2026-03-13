@@ -3,9 +3,7 @@ package com.flash.githubtrending.data.repository
 import com.flash.githubtrending.core.Result
 import com.flash.githubtrending.data.error.NetworkErrorMapper
 import com.flash.githubtrending.data.error.NetworkErrorMapper.toDomain
-import com.flash.githubtrending.data.local.dao.FavoriteDao
 import com.flash.githubtrending.data.local.dao.RepoDao
-import com.flash.githubtrending.data.local.entity.FavoriteEntity
 import com.flash.githubtrending.data.local.entity.RepoEntity
 import com.flash.githubtrending.data.local.mapper.toDomain
 import com.flash.githubtrending.data.local.mapper.toEntity
@@ -16,7 +14,7 @@ import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.repository.RepoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -29,22 +27,13 @@ import kotlin.coroutines.cancellation.CancellationException
 class RepoRepositoryImpl @Inject constructor(
     private val api: GithubApi,
     private val repoDao: RepoDao,
-    private val favoriteDao: FavoriteDao,
     private val ioDispatcher: CoroutineDispatcher
 ) : RepoRepository {
     private val refreshMutex = Mutex()
+
     override fun observeTrendingRepos(): Flow<List<Repo>> {
-        return combine(
-            repoDao.observeRepos(),
-            favoriteDao.observeFavoriteIds()
-        ) { repos, favoriteIds ->
-
-            val favoriteSet = favoriteIds.toSet()
-
-            repos.map { entity ->
-                entity.toDomain(favoriteSet.contains(entity.id))
-            }
-        }
+        return repoDao.observeRepos()
+            .map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun refreshTrendingRepos(): Result<Unit> {
@@ -53,9 +42,11 @@ class RepoRepositoryImpl @Inject constructor(
                 try {
                     val response: SearchReposResponseDto =
                         api.getTrendingRepos(page = 1, perPage = 30)
+                    val favoriteIds = repoDao.getFavoriteIdsSet()
 
                     val entities: List<RepoEntity> = response.items
                         .toDomainList()
+                        .applyFavorites(favoriteIds)
                         .map { it.toEntity() }
 
                     repoDao.insertRepos(entities)
@@ -73,14 +64,13 @@ class RepoRepositoryImpl @Inject constructor(
     override suspend fun searchRepos(query: String): Result<List<Repo>> =
         withContext(ioDispatcher) {
             try {
-                val response = api.searchRepos(query = query, page = 1, perPage = 30)
-                val favoriteIds = favoriteDao.getFavoriteIds().toSet()
+                val response: SearchReposResponseDto =
+                    api.searchRepos(query = query, page = 1, perPage = 30)
+                val favoriteIds = repoDao.getFavoriteIdsSet()
 
                 val repos = response.items
                     .toDomainList()
-                    .map { repo ->
-                        repo.copy(isFavorite = favoriteIds.contains(repo.id))
-                    }
+                    .applyFavorites(favoriteIds)
 
                 Result.Success(repos)
 
@@ -93,21 +83,13 @@ class RepoRepositoryImpl @Inject constructor(
     override suspend fun toggleFavorite(repo: Repo): Result<Unit> =
         withContext(ioDispatcher) {
             try {
-                if (repo.isFavorite) {
-                    favoriteDao.delete(repo.id)
-                } else {
-                    val existing = repoDao.getRepoById(repo.id)
-                    if (existing == null) {
-                        repoDao.insertRepos(listOf(repo.toEntity()))
-                    }
-                    favoriteDao.insert(
-                        FavoriteEntity(
-                            repoId = repo.id,
-                            name = repo.name,
-                            fullName = repo.fullName
-                        )
-                    )
+                val existing = repoDao.getRepoById(repo.id)
+                if (existing == null) {
+                    repoDao.insert(repo.toEntity())
                 }
+
+                repoDao.toggleFavorite(repo.id)
+
                 Result.Success(Unit)
 
             } catch (t: Throwable) {
@@ -115,4 +97,14 @@ class RepoRepositoryImpl @Inject constructor(
                 Result.Error(NetworkErrorMapper.fromThrowable(t).toDomain())
             }
         }
+}
+
+private suspend fun RepoDao.getFavoriteIdsSet(): Set<Long> {
+    return getFavoriteIds().toSet()
+}
+
+private fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
+    return map { repo ->
+        repo.copy(isFavorite = repo.id in favoriteIds)
+    }
 }
