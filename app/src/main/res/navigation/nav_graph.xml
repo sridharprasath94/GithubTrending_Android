@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation app:startDestination="@id/startFragment"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <fragment
+        android:id="@+id/startFragment"
+        android:name="com.flash.githubtrending.presentation.xml.start.StartFragment">
+        <action
+            android:id="@+id/action_start_to_trending"
+            app:destination="@id/trendingFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/trendingFragment"
+        android:name="com.flash.githubtrending.presentation.xml.trending.TrendingReposFragment">
+        <action
+            android:id="@+id/action_trending_to_details"
+            app:destination="@id/detailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailsFragment"
+        android:name="com.flash.githubtrending.presentation.xml.details.RepoDetailsFragment">
+        <argument
+            android:name="repoName"
+            app:argType="string"/>
+    </fragment>
+
+</navigation>
