@@ -34,7 +34,6 @@ class FavoriteReposViewModel @Inject constructor(
             _isLoading,
             _error
         ) { favorites, isLoading, error ->
-            Log.d("SridharFavoriteReposViewModel", "Combining UI state: isLoading=$isLoading, error=$error, favoritesCount=${favorites.size}")
             FavoriteReposUiState(
                 isLoading = isLoading,
                 repos = favorites.sortedBy {

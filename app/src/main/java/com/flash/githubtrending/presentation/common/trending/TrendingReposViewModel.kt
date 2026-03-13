@@ -11,15 +11,20 @@ import com.flash.githubtrending.domain.usecase.SearchReposUseCase
 import com.flash.githubtrending.domain.usecase.ToggleFavouritesUseCase
 import com.flash.githubtrending.presentation.common.trending.TrendingReposUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class TrendingReposViewModel @Inject constructor(
     observeTrendingReposUseCase: ObserveTrendingReposUseCase,
@@ -31,6 +36,24 @@ class TrendingReposViewModel @Inject constructor(
     private val _searchResults = MutableStateFlow<List<Repo>?>(null)
     private val _isLoading = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
+
+    private val searchQuery = MutableStateFlow("")
+
+    init {
+        viewModelScope.launch {
+            searchQuery
+                .debounce(400)
+                .distinctUntilChanged()
+                .collectLatest { query ->
+                    if (query.isBlank()) {
+                        clearSearch()
+                    } else {
+                        performSearch(query)
+                    }
+                }
+        }
+        refresh()
+    }
 
     private val trendingReposFlow: StateFlow<List<Repo>> =
         observeTrendingReposUseCase()
@@ -47,8 +70,6 @@ class TrendingReposViewModel @Inject constructor(
             _isLoading,
             _error
         ) { trending, searchResults, isLoading, error ->
-
-            Log.d("SridharTrendingReposViewModel", "Combining UI state: isLoading=$isLoading, error=$error, trendingCount=${trending.size}, searchResultsCount=${searchResults?.size ?: 0}")
             val baseList = searchResults ?: trending
 
             TrendingReposUiState(
@@ -83,26 +104,24 @@ class TrendingReposViewModel @Inject constructor(
         }
     }
 
-    fun search(query: String) {
+    private suspend fun performSearch(query: String) {
         if (query.isBlank()) {
             _searchResults.value = null
             return
         }
 
-        viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
+        _isLoading.value = true
+        _error.value = null
 
-            when (val result = searchRepos(query)) {
-                is Result.Success -> {
-                    _searchResults.value = result.data
-                    _isLoading.value = false
-                }
+        when (val result = searchRepos(query)) {
+            is Result.Success -> {
+                _searchResults.value = result.data
+                _isLoading.value = false
+            }
 
-                is Result.Error -> {
-                    _isLoading.value = false
-                    _error.value = result.error.toString()
-                }
+            is Result.Error -> {
+                _isLoading.value = false
+                _error.value = result.error.toString()
             }
         }
     }
@@ -127,5 +146,9 @@ class TrendingReposViewModel @Inject constructor(
 
     fun clearSearch() {
         _searchResults.value = null
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        searchQuery.value = query
     }
 }

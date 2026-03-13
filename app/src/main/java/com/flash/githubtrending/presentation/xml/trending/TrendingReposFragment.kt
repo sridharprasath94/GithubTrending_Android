@@ -21,7 +21,12 @@ import com.flash.githubtrending.presentation.common.trending.TrendingReposViewMo
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class TrendingReposFragment :
@@ -33,57 +38,16 @@ class TrendingReposFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
         observeUiState()
-        setupSearchButton()
         observeSearchField()
-
-        viewModel.refresh()
     }
 
-    private fun setupSearchButton() {
-        binding.btnSearch.setOnClickListener {
-            val query = binding.etSearch.text.toString()
-            if (query.isNotBlank()) {
-                viewModel.search(query)
-            } else {
-                viewModel.clearSearch()
-            }
-        }
-    }
-
+    @OptIn(FlowPreview::class)
     private fun observeSearchField() {
         binding.etSearch.doAfterTextChanged { text ->
-            if (text.isNullOrBlank()) {
-                viewModel.clearSearch()
-            }
+            viewModel.onSearchQueryChanged(text?.toString().orEmpty())
         }
-        binding.etSearch.setOnEditorActionListener { _, actionId, event ->
-
-            val isKeyboardEnter =
-                event?.keyCode == KeyEvent.KEYCODE_ENTER &&
-                        event.action == KeyEvent.ACTION_DOWN
-
-            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                actionId == EditorInfo.IME_ACTION_DONE ||
-                actionId == EditorInfo.IME_ACTION_UNSPECIFIED ||
-                isKeyboardEnter
-            ) {
-                val query = binding.etSearch.text.toString()
-
-                if (query.isNotBlank()) {
-                    viewModel.search(query)
-                } else {
-                    viewModel.clearSearch()
-                }
-
-                true
-            } else {
-                false
-            }
-        }
-
     }
 
     private fun setupRecyclerView() {
@@ -109,7 +73,6 @@ class TrendingReposFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    Log.d("SridharTrendingReposFragment", "Received UI state: ${state.repos.size}")
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE

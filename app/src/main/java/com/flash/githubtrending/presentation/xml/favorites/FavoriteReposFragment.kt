@@ -56,7 +56,6 @@ class FavoriteReposFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    Log.d("SridharFavoriteReposFragment", "Received UI state: ${state.repos.size}")
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE
