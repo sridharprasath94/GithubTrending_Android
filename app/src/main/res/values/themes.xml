@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.GithubTrending" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.GithubTrending" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <!-- Bottom navigation style -->
+        <item name="bottomNavigationStyle">@style/Widget.Material3.BottomNavigationView</item>
+
+    </style>
+
 </resources>

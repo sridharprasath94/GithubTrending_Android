@@ -3,4 +3,5 @@
     <string name="trending">Trending</string>
     <string name="favorites">Favorites</string>
     <string name="github_trending">GitHub Trending</string>
+    <string name="favourites">Favourites</string>
 </resources>
