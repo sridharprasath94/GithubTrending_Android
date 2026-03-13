@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation app:startDestination="@id/startFragment"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    app:startDestination="@id/startFragment">
 
     <fragment
         android:id="@+id/startFragment"
@@ -20,11 +20,20 @@
     </fragment>
 
     <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.flash.githubtrending.presentation.xml.favorites.FavoriteReposFragment">
+
+        <action
+            android:id="@+id/action_favorites_to_details"
+            app:destination="@id/detailsFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/detailsFragment"
         android:name="com.flash.githubtrending.presentation.xml.details.RepoDetailsFragment">
         <argument
             android:name="repoName"
-            app:argType="string"/>
+            app:argType="string" />
     </fragment>
 
 </navigation>

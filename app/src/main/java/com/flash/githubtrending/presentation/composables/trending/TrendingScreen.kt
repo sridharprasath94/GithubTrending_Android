@@ -64,9 +64,9 @@ fun TrendingScreen(
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        if (searchQuery.isNotBlank()) {
-                            viewModel.search(searchQuery)
-                        }
+//                        if (searchQuery.isNotBlank()) {
+//                            viewModel.search(searchQuery)
+//                        }
                     }
                 )
             )

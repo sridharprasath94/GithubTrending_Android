@@ -1,4 +1,4 @@
-package com.flash.githubtrending.presentation.xml.trending
+package com.flash.githubtrending.presentation.xml.shared
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,7 +9,7 @@ import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.RowRepoBinding
 import com.flash.githubtrending.domain.model.Repo
 
-class RepoAdapter :
+class RepoAdapter(private val enableFavoritesIcon: Boolean = true) :
     ListAdapter<Repo, RepoAdapter.RepoViewHolder>(DiffCallback) {
 
     private var onItemClick: ((Repo) -> Unit)? = null
@@ -18,22 +18,35 @@ class RepoAdapter :
     class RepoViewHolder(
         private val binding: RowRepoBinding,
         private val onItemClick: ((Repo) -> Unit)?,
-        private val onFavoriteClick: ((Repo) -> Unit)?
+        private val onFavoriteClick: ((Repo) -> Unit)?,
+        private val enableFavoritesIcon: Boolean
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(repo: Repo) {
             binding.repoName.text = repo.fullName
 
-            val iconRes =
-                if (repo.isFavorite)
-                    R.drawable.ic_star_filled
-                else
-                    R.drawable.ic_star_outline
 
-            binding.ivFavorite.setImageResource(iconRes)
+            if (enableFavoritesIcon) {
+                val iconRes =
+                    if (repo.isFavorite)
+                        R.drawable.ic_star_filled
+                    else
+                        R.drawable.ic_star_outline
 
-            binding.ivFavorite.setOnClickListener {
-                onFavoriteClick?.invoke(repo)
+                val colorFilter = if (repo.isFavorite) {
+                    binding.root.context.getColor(R.color.star_filled)
+                } else {
+                    binding.root.context.getColor(R.color.star_outline)
+                }
+
+                binding.ivFavorite.setImageResource(iconRes)
+                binding.ivFavorite.setColorFilter(colorFilter)
+
+                binding.ivFavorite.setOnClickListener {
+                    onFavoriteClick?.invoke(repo)
+                }
+            } else {
+                binding.ivFavorite.visibility = android.view.View.GONE
             }
 
             binding.root.setOnClickListener {
@@ -56,7 +69,7 @@ class RepoAdapter :
             parent,
             false
         )
-        return RepoViewHolder(binding, onItemClick, onFavoriteClick)
+        return RepoViewHolder(binding, onItemClick, onFavoriteClick, enableFavoritesIcon)
     }
 
     override fun onBindViewHolder(holder: RepoViewHolder, position: Int) {

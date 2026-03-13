@@ -1,13 +1,10 @@
-package com.flash.githubtrending.presentation.xml.trending
+package com.flash.githubtrending.presentation.xml.favorites
 
 
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -16,39 +13,29 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
-import com.flash.githubtrending.databinding.FragmentTrendingBinding
-import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
+import com.flash.githubtrending.databinding.FragmentFavoritesBinding
+import com.flash.githubtrending.presentation.common.favorites.FavoriteReposViewModel
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
+import com.flash.githubtrending.presentation.xml.trending.TrendingReposFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class TrendingReposFragment :
-    Fragment(R.layout.fragment_trending) {
+class FavoriteReposFragment :
+    Fragment(R.layout.fragment_favorites) {
 
-    private val binding: FragmentTrendingBinding by viewBinding(FragmentTrendingBinding::bind)
-    private val viewModel: TrendingReposViewModel by viewModels()
-    private val adapter = RepoAdapter()
+    private val binding: FragmentFavoritesBinding by viewBinding(FragmentFavoritesBinding::bind)
+    private val viewModel: FavoriteReposViewModel by viewModels()
+    private val adapter = RepoAdapter(enableFavoritesIcon = false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupRecyclerView()
         observeUiState()
-        observeSearchField()
     }
 
-    @OptIn(FlowPreview::class)
-    private fun observeSearchField() {
-        binding.etSearch.doAfterTextChanged { text ->
-            viewModel.onSearchQueryChanged(text?.toString().orEmpty())
-        }
-    }
 
     private fun setupRecyclerView() {
         binding.recyclerView.layoutManager =
@@ -58,14 +45,10 @@ class TrendingReposFragment :
 
         adapter.setOnItemClickListener { repo ->
             val action =
-                TrendingReposFragmentDirections
-                    .actionTrendingToDetails(repo.fullName)
+                FavoriteReposFragmentDirections
+                    .actionFavoritesToDetails(repo.fullName)
 
             findNavController().navigate(action)
-        }
-
-        adapter.setOnFavoriteClickListener { repo ->
-            viewModel.toggleFavorite(repo)
         }
     }
 

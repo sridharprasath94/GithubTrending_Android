@@ -4,26 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+
+    <EditText
+        android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:imeOptions="actionSearch"
-            android:hint="Search repos" />
-
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Search" />
-    </LinearLayout>
+        android:imeOptions="actionSearch"
+        android:hint="Search repos" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

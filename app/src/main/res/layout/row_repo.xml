@@ -21,10 +21,11 @@
 
     <ImageView
         android:id="@+id/ivFavorite"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:contentDescription="Favourites"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="@string/favourites"
         android:src="@drawable/ic_star_outline"
+        app:tint="?attr/colorPrimary"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintEnd_toEndOf="parent"
