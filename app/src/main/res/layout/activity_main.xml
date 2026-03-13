@@ -7,6 +7,7 @@
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorSurfaceContainer"
         android:title="@string/github_trending"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
