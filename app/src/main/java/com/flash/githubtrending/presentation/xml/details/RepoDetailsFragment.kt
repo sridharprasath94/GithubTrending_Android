@@ -16,7 +16,7 @@ class RepoDetailsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding) {
-            tvRepoName.text = args.repoName
+            tvRepoName.text = args.repo.name
         }
     }
 }
