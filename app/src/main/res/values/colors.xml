@@ -13,7 +13,7 @@
 
     <!-- Core palette -->
     <color name="primary">#374151</color>
-    <color name="on_primary">#FFFFFF</color>
+    <color name="on_primary">#000000</color>
 
     <color name="surface">#F2F2F2</color>
     <color name="background">#F9FAFB</color>
