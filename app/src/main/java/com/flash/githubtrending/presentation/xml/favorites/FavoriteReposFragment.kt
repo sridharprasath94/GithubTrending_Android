@@ -10,11 +10,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentFavoritesBinding
 import com.flash.githubtrending.presentation.common.favorites.FavoriteReposViewModel
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
+import com.flash.githubtrending.presentation.xml.trending.TrendingReposFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.launch
@@ -40,6 +42,14 @@ class FavoriteReposFragment :
             LinearLayoutManager(requireContext())
 
         binding.recyclerView.adapter = adapter
+
+        adapter.setOnItemClickListener { repo ->
+            val action =
+                FavoriteReposFragmentDirections
+                    .actionFavoritesToDetails(repo.fullName)
+
+            findNavController().navigate(action)
+        }
     }
 
     private fun observeUiState() {
