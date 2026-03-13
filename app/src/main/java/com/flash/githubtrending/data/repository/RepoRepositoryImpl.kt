@@ -36,6 +36,11 @@ class RepoRepositoryImpl @Inject constructor(
             .map { entities -> entities.map { it.toDomain() } }
     }
 
+    override fun observeFavoriteRepos(): Flow<List<Repo>> {
+        return repoDao.observeFavoriteRepos()
+            .map { entities -> entities.map { it.toDomain() } }
+    }
+
     override suspend fun refreshTrendingRepos(): Result<Unit> {
         return withContext(ioDispatcher) {
             refreshMutex.withLock {

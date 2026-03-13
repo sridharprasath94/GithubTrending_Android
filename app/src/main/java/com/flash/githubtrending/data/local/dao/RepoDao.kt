@@ -32,7 +32,7 @@ interface RepoDao {
     suspend fun getFavoriteIds(): List<Long>
 
     @Query("SELECT * FROM repos WHERE isFavorite = 1")
-    fun observeFavorites(): Flow<List<RepoEntity>>
+    fun observeFavoriteRepos(): Flow<List<RepoEntity>>
 
     @Query("UPDATE repos SET isFavorite = NOT isFavorite WHERE id = :id")
     suspend fun toggleFavorite(id: Long)
