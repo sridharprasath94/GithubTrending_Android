@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.coil)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

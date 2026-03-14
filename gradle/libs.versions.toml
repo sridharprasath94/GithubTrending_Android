@@ -19,6 +19,7 @@ room = "2.8.4"
 roomTesting = "2.8.4"
 googleFonts = "1.10.0"
 recyclerview = "1.4.0"
+swipeRefresh = "1.1.0"
 vbpd = "2.0.4"
 junitKtx = "1.3.0"
 coroutines = "1.7.3"
@@ -60,6 +61,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "roomTesting" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swipeRefresh" }
 dev-android-broadcast-vbpd = { group = "dev.androidbroadcast.vbpd", name = "vbpd", version.ref = "vbpd" }
 dev-android-broadcast-vbpd-reflection = { group = "dev.androidbroadcast.vbpd", name = "vbpd-reflection", version.ref = "vbpd" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }

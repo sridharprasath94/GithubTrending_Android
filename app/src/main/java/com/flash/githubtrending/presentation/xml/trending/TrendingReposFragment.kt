@@ -50,6 +50,10 @@ class TrendingReposFragment :
 
         binding.recyclerView.adapter = adapter
 
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refresh()
+        }
+
         adapter.setOnItemClickListener { repo ->
             val action =
                 TrendingReposFragmentDirections
@@ -67,6 +71,7 @@ class TrendingReposFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
+                    binding.swipeRefresh.isRefreshing = state.isLoading
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE
