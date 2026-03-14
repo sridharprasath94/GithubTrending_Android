@@ -3,7 +3,6 @@ package com.flash.githubtrending.presentation.xml.favorites
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -57,20 +56,11 @@ class FavoriteReposFragment :
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE
-                            adapter.submitList(emptyList())
-                        }
-
-                        state.error != null -> {
-                            binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(emptyList())
-                            Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
                         }
 
                         else -> {
                             binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(state.repos) {
-                                binding.recyclerView.scrollToPosition(0)
-                            }
+                            adapter.submitList(state.repos)
                         }
                     }
                 }
