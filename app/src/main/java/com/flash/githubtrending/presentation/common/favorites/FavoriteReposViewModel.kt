@@ -19,7 +19,6 @@ class FavoriteReposViewModel @Inject constructor(
     observeFavoriteReposUseCase: ObserveFavoriteReposUseCase
 ) : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
-    private val _error = MutableStateFlow<String?>(null)
     private val favoriteReposFlow: StateFlow<List<Repo>> =
         observeFavoriteReposUseCase()
             .stateIn(
@@ -31,19 +30,17 @@ class FavoriteReposViewModel @Inject constructor(
     val uiState: StateFlow<FavoriteReposUiState> =
         combine(
             favoriteReposFlow,
-            _isLoading,
-            _error
-        ) { favorites, isLoading, error ->
+            _isLoading
+        ) { favorites, isLoading ->
             FavoriteReposUiState(
                 isLoading = isLoading,
                 repos = favorites.sortedBy {
                     if (it.isFavorite) 0 else 1
-                },
-                error = error
+                }
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = FavoriteReposUiState(isLoading = true, repos = emptyList(), error = null)
+            initialValue = FavoriteReposUiState(isLoading = true, repos = emptyList())
         )
 }

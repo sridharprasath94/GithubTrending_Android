@@ -3,7 +3,6 @@ package com.flash.githubtrending.presentation.common.trending
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flash.githubtrending.core.Result
-import com.flash.githubtrending.domain.error.DomainError
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.usecase.ObserveTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.RefreshTrendingReposUseCase
@@ -30,7 +29,7 @@ import javax.inject.Inject
 class TrendingReposViewModel @Inject constructor(
     observeTrendingReposUseCase: ObserveTrendingReposUseCase,
     private val refreshTrendingRepos: RefreshTrendingReposUseCase,
-    private val searchRepos: SearchReposUseCase,
+    private val searchReposUseCase: SearchReposUseCase,
     private val toggleFavouritesUseCase: ToggleFavouritesUseCase
 ) : ViewModel() {
 
@@ -111,7 +110,7 @@ class TrendingReposViewModel @Inject constructor(
 
         _isLoading.value = true
 
-        when (val result = searchRepos(query)) {
+        when (val result = searchReposUseCase(query)) {
             is Result.Success -> {
                 _searchResults.value = result.data
                 _isLoading.value = false
