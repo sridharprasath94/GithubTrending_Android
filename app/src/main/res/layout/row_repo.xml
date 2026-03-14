@@ -10,15 +10,73 @@
         android:id="@+id/repoName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/ivFavorite"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/repoOwner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:layout_marginTop="2dp"
+        app:layout_constraintStart_toStartOf="@id/repoName"
+        app:layout_constraintEnd_toStartOf="@id/ivFavorite"
+        app:layout_constraintTop_toBottomOf="@id/repoName"/>
+
+    <LinearLayout
+        android:id="@+id/repoMetaRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp"
+        app:layout_constraintStart_toStartOf="@id/repoName"
+        app:layout_constraintEnd_toStartOf="@id/ivFavorite"
+        app:layout_constraintTop_toBottomOf="@id/repoOwner">
+
+        <TextView
+            android:id="@+id/repoLanguage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:background="?attr/colorSurfaceVariant"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"/>
+
+        <TextView
+            android:id="@+id/repoStars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textSize="12sp"
+            android:textColor="?attr/colorOnSurfaceVariant"/>
+
+        <TextView
+            android:id="@+id/repoForks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textSize="12sp"
+            android:textColor="?attr/colorOnSurfaceVariant"/>
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/ivFavorite"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="9dp"
+        android:scaleType="centerInside"
         android:contentDescription="@string/favourites"
         android:src="@drawable/ic_star_outline"
         android:clickable="true"

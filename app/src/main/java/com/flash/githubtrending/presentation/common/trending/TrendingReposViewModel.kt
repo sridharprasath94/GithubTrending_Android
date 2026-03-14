@@ -3,16 +3,20 @@ package com.flash.githubtrending.presentation.common.trending
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flash.githubtrending.core.Result
+import com.flash.githubtrending.domain.error.DomainError
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.usecase.ObserveTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.RefreshTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.SearchReposUseCase
 import com.flash.githubtrending.domain.usecase.ToggleFavouritesUseCase
+import com.flash.githubtrending.presentation.error.UIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -32,7 +36,8 @@ class TrendingReposViewModel @Inject constructor(
 
     private val _searchResults = MutableStateFlow<List<Repo>?>(null)
     private val _isLoading = MutableStateFlow(false)
-    private val _error = MutableStateFlow<String?>(null)
+    private val _events = MutableSharedFlow<UIError>()
+    val events = _events.asSharedFlow()
 
     private val searchQuery = MutableStateFlow("")
 
@@ -64,17 +69,15 @@ class TrendingReposViewModel @Inject constructor(
         combine(
             trendingReposFlow,
             _searchResults,
-            _isLoading,
-            _error
-        ) { trending, searchResults, isLoading, error ->
+            _isLoading
+        ) { trending, searchResults, isLoading ->
             val baseList = searchResults ?: trending
 
             TrendingReposUiState(
                 isLoading = isLoading,
                 repos = baseList.sortedBy {
                     if (it.isFavorite) 0 else 1
-                },
-                error = error
+                }
             )
         }.stateIn(
             scope = viewModelScope,
@@ -86,7 +89,6 @@ class TrendingReposViewModel @Inject constructor(
         viewModelScope.launch {
             _searchResults.value = null
             _isLoading.value = true
-            _error.value = null
 
             when (val result = refreshTrendingRepos()) {
                 is Result.Success -> {
@@ -95,7 +97,7 @@ class TrendingReposViewModel @Inject constructor(
 
                 is Result.Error -> {
                     _isLoading.value = false
-                    _error.value = result.error.toString()
+                    _events.emit(UIError.from(result.error))
                 }
             }
         }
@@ -108,7 +110,6 @@ class TrendingReposViewModel @Inject constructor(
         }
 
         _isLoading.value = true
-        _error.value = null
 
         when (val result = searchRepos(query)) {
             is Result.Success -> {
@@ -118,7 +119,7 @@ class TrendingReposViewModel @Inject constructor(
 
             is Result.Error -> {
                 _isLoading.value = false
-                _error.value = result.error.toString()
+                _events.emit(UIError.from(result.error))
             }
         }
     }
@@ -135,7 +136,7 @@ class TrendingReposViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    _error.value = result.error.toString()
+                    _events.emit(UIError.from(result.error))
                 }
             }
         }

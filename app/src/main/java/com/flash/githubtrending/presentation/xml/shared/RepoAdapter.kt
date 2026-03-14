@@ -25,6 +25,20 @@ class RepoAdapter(private val enableFavoritesIcon: Boolean = true) :
         fun bind(repo: Repo) {
             binding.repoName.text = repo.fullName
 
+            binding.repoOwner.text = repo.ownerName
+
+            binding.repoLanguage.text = repo.language ?: "Unknown"
+
+            binding.repoStars.text = buildString {
+                append("★ ")
+                append(repo.stars)
+            }
+
+            binding.repoForks.text = buildString {
+                append("🍴 ")
+                append(repo.forks)
+            }
+
             if (enableFavoritesIcon) {
                 val iconRes =
                     if (repo.isFavorite)

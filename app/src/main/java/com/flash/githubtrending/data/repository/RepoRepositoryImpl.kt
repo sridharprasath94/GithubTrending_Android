@@ -54,6 +54,7 @@ class RepoRepositoryImpl @Inject constructor(
                         .applyFavorites(favoriteIds)
                         .map { it.toEntity() }
 
+                    repoDao.clearRepos()
                     repoDao.insertRepos(entities)
 
                     Result.Success(Unit)

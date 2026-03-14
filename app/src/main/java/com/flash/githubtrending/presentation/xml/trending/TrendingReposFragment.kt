@@ -2,10 +2,7 @@ package com.flash.githubtrending.presentation.xml.trending
 
 
 import android.os.Bundle
-import android.util.Log
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -23,10 +20,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class TrendingReposFragment :
@@ -40,6 +33,7 @@ class TrendingReposFragment :
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeUiState()
+        observeEvents()
         observeSearchField()
     }
 
@@ -55,6 +49,10 @@ class TrendingReposFragment :
             LinearLayoutManager(requireContext())
 
         binding.recyclerView.adapter = adapter
+
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refresh()
+        }
 
         adapter.setOnItemClickListener { repo ->
             val action =
@@ -73,26 +71,31 @@ class TrendingReposFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
+                    binding.swipeRefresh.isRefreshing = state.isLoading
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE
-                            adapter.submitList(emptyList())
-                        }
-
-                        state.error != null -> {
-                            binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(emptyList())
-                            Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
                         }
 
                         else -> {
                             binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(state.repos) {
-                                binding.recyclerView.scrollToPosition(0)
-                            }
+
+                            adapter.submitList(state.repos)
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun observeEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { error ->
+                    Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT)
+                        .show()
+                }
+
             }
         }
     }

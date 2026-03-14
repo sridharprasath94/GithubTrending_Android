@@ -4,6 +4,5 @@ import com.flash.githubtrending.domain.model.Repo
 
 data class TrendingReposUiState(
     val isLoading: Boolean = false,
-    val repos: List<Repo> = emptyList(),
-    val error: String? = null
+    val repos: List<Repo> = emptyList()
 )

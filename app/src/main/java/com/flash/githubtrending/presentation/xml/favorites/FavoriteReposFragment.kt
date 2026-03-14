@@ -2,7 +2,6 @@ package com.flash.githubtrending.presentation.xml.favorites
 
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -16,7 +15,6 @@ import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentFavoritesBinding
 import com.flash.githubtrending.presentation.common.favorites.FavoriteReposViewModel
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
-import com.flash.githubtrending.presentation.xml.trending.TrendingReposFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.launch
