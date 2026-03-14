@@ -33,6 +33,7 @@ class TrendingReposFragment :
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeUiState()
+        observeEvents()
         observeSearchField()
     }
 
@@ -69,23 +70,27 @@ class TrendingReposFragment :
                     when {
                         state.isLoading && state.repos.isEmpty() -> {
                             binding.fullScreenLoader.visibility = View.VISIBLE
-                            adapter.submitList(emptyList())
-                        }
-
-                        state.error != null -> {
-                            binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(emptyList())
-                            Toast.makeText(requireContext(), state.error.message, Toast.LENGTH_SHORT).show()
                         }
 
                         else -> {
                             binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(state.repos) {
-                                binding.recyclerView.scrollToPosition(0)
-                            }
+
+                            adapter.submitList(state.repos)
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun observeEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { error ->
+                    Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT)
+                        .show()
+                }
+
             }
         }
     }
