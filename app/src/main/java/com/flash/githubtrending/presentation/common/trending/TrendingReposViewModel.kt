@@ -3,11 +3,13 @@ package com.flash.githubtrending.presentation.common.trending
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flash.githubtrending.core.Result
+import com.flash.githubtrending.domain.error.DomainError
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.usecase.ObserveTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.RefreshTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.SearchReposUseCase
 import com.flash.githubtrending.domain.usecase.ToggleFavouritesUseCase
+import com.flash.githubtrending.presentation.error.UIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,7 @@ class TrendingReposViewModel @Inject constructor(
 
     private val _searchResults = MutableStateFlow<List<Repo>?>(null)
     private val _isLoading = MutableStateFlow(false)
-    private val _error = MutableStateFlow<String?>(null)
+    private val _error = MutableStateFlow<DomainError?>(null)
 
     private val searchQuery = MutableStateFlow("")
 
@@ -74,7 +76,7 @@ class TrendingReposViewModel @Inject constructor(
                 repos = baseList.sortedBy {
                     if (it.isFavorite) 0 else 1
                 },
-                error = error
+                error = error?.let { UIError.from(it) }
             )
         }.stateIn(
             scope = viewModelScope,
@@ -95,7 +97,7 @@ class TrendingReposViewModel @Inject constructor(
 
                 is Result.Error -> {
                     _isLoading.value = false
-                    _error.value = result.error.toString()
+                    _error.value = result.error
                 }
             }
         }
@@ -118,7 +120,7 @@ class TrendingReposViewModel @Inject constructor(
 
             is Result.Error -> {
                 _isLoading.value = false
-                _error.value = result.error.toString()
+                _error.value = result.error
             }
         }
     }
@@ -135,7 +137,7 @@ class TrendingReposViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    _error.value = result.error.toString()
+                    _error.value = result.error
                 }
             }
         }

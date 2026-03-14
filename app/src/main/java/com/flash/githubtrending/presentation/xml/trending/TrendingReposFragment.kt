@@ -75,7 +75,7 @@ class TrendingReposFragment :
                         state.error != null -> {
                             binding.fullScreenLoader.visibility = View.GONE
                             adapter.submitList(emptyList())
-                            Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), state.error.message, Toast.LENGTH_SHORT).show()
                         }
 
                         else -> {
