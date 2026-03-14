@@ -8,7 +8,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnOpen"
-        android:text="Open Trending Repos"
+        android:text="@string/open_trending_repos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cornerRadius="24dp"/>

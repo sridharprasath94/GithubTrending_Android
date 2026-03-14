@@ -6,4 +6,7 @@
     <string name="favourites">Favourites</string>
     <string name="open_owner_profile">Open Owner Profile</string>
     <string name="open_repository">Open Repository</string>
+    <string name="search_repos">Search repos</string>
+    <string name="repository_owner_avatar">Repository owner avatar</string>
+    <string name="open_trending_repos">Open Trending Repos</string>
 </resources>

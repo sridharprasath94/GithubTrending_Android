@@ -9,8 +9,10 @@
         android:id="@+id/etSearch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Search repos"
+        android:autofillHints=""
+        android:hint="@string/search_repos"
         android:imeOptions="actionSearch"
+        android:inputType="text"
         android:padding="12dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,7 +20,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/etSearch"
         app:layout_constraintBottom_toBottomOf="parent"
