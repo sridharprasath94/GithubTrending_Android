@@ -64,6 +64,7 @@ class TrendingReposFragment :
 
         adapter.setOnFavoriteClickListener { repo ->
             viewModel.toggleFavorite(repo)
+            binding.recyclerView.scrollToPosition(0)
         }
     }
 
@@ -79,7 +80,6 @@ class TrendingReposFragment :
 
                         else -> {
                             binding.fullScreenLoader.visibility = View.GONE
-
                             adapter.submitList(state.repos)
                         }
                     }
