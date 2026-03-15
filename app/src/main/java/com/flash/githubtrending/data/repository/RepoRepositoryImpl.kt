@@ -14,6 +14,7 @@ import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.repository.RepoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -48,6 +49,7 @@ class RepoRepositoryImpl @Inject constructor(
                     val response: SearchReposResponseDto =
                         api.getTrendingRepos(page = 1, perPage = 30)
                     val favoriteIds = repoDao.getFavoriteIdsSet()
+                    val favoriteRepos = repoDao.observeFavoriteReposOnce()
 
                     val entities: List<RepoEntity> = response.items
                         .toDomainList()
@@ -56,6 +58,12 @@ class RepoRepositoryImpl @Inject constructor(
 
                     repoDao.clearRepos()
                     repoDao.insertRepos(entities)
+
+                    // Re‑insert favorite repos that are not part of the trending list
+                    favoriteRepos
+                        .filter { fav -> entities.none { it.id == fav.id } }
+                        .map { it.toDomain().toEntity() }
+                        .let { repoDao.insertRepos(it) }
 
                     Result.Success(Unit)
 
@@ -113,4 +121,8 @@ private fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
     return map { repo ->
         repo.copy(isFavorite = repo.id in favoriteIds)
     }
+}
+
+private suspend fun RepoDao.observeFavoriteReposOnce(): List<RepoEntity> {
+    return observeFavoriteRepos().first()
 }
