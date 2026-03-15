@@ -4,11 +4,20 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.paging.PagingSource
 import com.flash.githubtrending.data.local.entity.RepoEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RepoDao {
+
+    @Query(
+        """
+SELECT * FROM repos
+ORDER BY isFavorite DESC, stars DESC
+"""
+    )
+    fun pagingSource(): PagingSource<Int, RepoEntity>
 
     @Query("SELECT * FROM repos ORDER BY stars DESC")
     fun observeRepos(): Flow<List<RepoEntity>>

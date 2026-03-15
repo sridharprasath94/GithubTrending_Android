@@ -1,11 +1,12 @@
 package com.flash.githubtrending.domain.repository
 
+import androidx.paging.PagingData
+import com.flash.githubtrending.core.Result
 import com.flash.githubtrending.domain.model.Repo
-import  com.flash.githubtrending.core.Result
 import kotlinx.coroutines.flow.Flow
 
 interface RepoRepository {
-    fun observeTrendingRepos(): Flow<List<Repo>>
+    fun observePagedTrendingRepos() : Flow<PagingData<Repo>>
 
     suspend fun refreshTrendingRepos(): Result<Unit>
 
