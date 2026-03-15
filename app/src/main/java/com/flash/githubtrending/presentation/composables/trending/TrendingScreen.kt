@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.flash.githubtrending.presentation.common.trending.TrendingReposUiState
 import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
 import com.flash.githubtrending.presentation.screens.RepoRow
 
@@ -32,7 +33,7 @@ fun TrendingScreen(
     onRepoClick: (String) -> Unit,
     viewModel: TrendingReposViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState : TrendingReposUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.refresh()

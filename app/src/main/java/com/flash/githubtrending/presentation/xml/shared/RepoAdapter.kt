@@ -2,15 +2,15 @@ package com.flash.githubtrending.presentation.xml.shared
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.RowRepoBinding
 import com.flash.githubtrending.domain.model.Repo
 
 class RepoAdapter(private val enableFavoritesIcon: Boolean = true) :
-    ListAdapter<Repo, RepoAdapter.RepoViewHolder>(DiffCallback) {
+    PagingDataAdapter<Repo, RepoAdapter.RepoViewHolder>(DiffCallback) {
 
     private var onItemClick: ((Repo) -> Unit)? = null
     private var onFavoriteClick: ((Repo) -> Unit)? = null
@@ -86,7 +86,8 @@ class RepoAdapter(private val enableFavoritesIcon: Boolean = true) :
     }
 
     override fun onBindViewHolder(holder: RepoViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val repo = getItem(position) ?: return
+        holder.bind(repo)
     }
 
 

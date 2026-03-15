@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flash.githubtrending.core.Result
 import com.flash.githubtrending.domain.model.Repo
-import com.flash.githubtrending.domain.usecase.ObserveTrendingReposUseCase
+import com.flash.githubtrending.domain.usecase.ObservePagedTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.RefreshTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.SearchReposUseCase
 import com.flash.githubtrending.domain.usecase.ToggleFavouritesUseCase
@@ -14,20 +14,23 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class TrendingReposViewModel @Inject constructor(
-    observeTrendingReposUseCase: ObserveTrendingReposUseCase,
+    observePagedTrendingReposUseCase: ObservePagedTrendingReposUseCase,
     private val refreshTrendingRepos: RefreshTrendingReposUseCase,
     private val searchReposUseCase: SearchReposUseCase,
     private val toggleFavouritesUseCase: ToggleFavouritesUseCase
@@ -56,27 +59,21 @@ class TrendingReposViewModel @Inject constructor(
         refresh()
     }
 
-    private val trendingReposFlow: StateFlow<List<Repo>> =
-        observeTrendingReposUseCase()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
+    val pagedRepos: Flow<PagingData<Repo>> =
+        observePagedTrendingReposUseCase()
+            .cachedIn(viewModelScope)
 
     val uiState: StateFlow<TrendingReposUiState> =
         combine(
-            trendingReposFlow,
             _searchResults,
             _isLoading
-        ) { trending, searchResults, isLoading ->
-            val baseList = searchResults ?: trending
+        ) { searchResults, isLoading ->
 
             TrendingReposUiState(
                 isLoading = isLoading,
-                repos = baseList.sortedBy {
+                repos = searchResults?.sortedBy {
                     if (it.isFavorite) 0 else 1
-                }
+                } ?: emptyList()
             )
         }.stateIn(
             scope = viewModelScope,

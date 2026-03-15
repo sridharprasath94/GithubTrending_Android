@@ -19,6 +19,7 @@ import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -51,7 +52,7 @@ class TrendingReposFragment :
         binding.recyclerView.adapter = adapter
 
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.refresh()
+            adapter.refresh()
         }
 
         adapter.setOnItemClickListener { repo ->
@@ -71,18 +72,19 @@ class TrendingReposFragment :
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    binding.swipeRefresh.isRefreshing = state.isLoading
-                    when {
-                        state.isLoading && state.repos.isEmpty() -> {
-                            binding.fullScreenLoader.visibility = View.VISIBLE
-                        }
+                viewModel.pagedRepos.collectLatest { pagingData ->
+                    binding.fullScreenLoader.visibility = View.GONE
+                    adapter.submitData(pagingData)
+                    binding.swipeRefresh.isRefreshing = false
+                }
+            }
+        }
 
-                        else -> {
-                            binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(state.repos)
-                        }
-                    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    binding.fullScreenLoader.visibility =
+                        if (state.isLoading) View.VISIBLE else View.GONE
                 }
             }
         }
