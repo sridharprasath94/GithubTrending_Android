@@ -15,7 +15,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,19 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.flash.githubtrending.presentation.common.trending.TrendingReposUiState
 import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
-import com.flash.githubtrending.presentation.screens.RepoRow
+import com.flash.githubtrending.presentation.composables.RepoRow
 
 @Composable
 fun TrendingScreen(
     onRepoClick: (String) -> Unit,
     viewModel: TrendingReposViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState : TrendingReposUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.refresh()
-    }
 
     var searchQuery by remember { mutableStateOf("") }
 

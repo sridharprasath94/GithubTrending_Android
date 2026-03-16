@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentFavoritesBinding
@@ -60,7 +61,7 @@ class FavoriteReposFragment :
 
                         else -> {
                             binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(state.repos)
+                            adapter.submitData(PagingData.from(state.repos))
                         }
                     }
                 }

@@ -4,6 +4,7 @@ package com.flash.githubtrending.presentation.xml.trending
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,10 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentTrendingBinding
 import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
+import com.flash.githubtrending.presentation.utils.fastSmoothScrollToTop
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -35,6 +38,22 @@ class TrendingReposFragment :
         observeUiState()
         observeEvents()
         observeSearchField()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
+                    val firstVisible = layoutManager.findFirstVisibleItemPosition()
+
+                    if (firstVisible > 0) {
+                        binding.recyclerView.fastSmoothScrollToTop()
+                    } else {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            }
+        )
     }
 
     @OptIn(FlowPreview::class)
@@ -51,7 +70,7 @@ class TrendingReposFragment :
         binding.recyclerView.adapter = adapter
 
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.refresh()
+            adapter.refresh()
         }
 
         adapter.setOnItemClickListener { repo ->
@@ -71,18 +90,19 @@ class TrendingReposFragment :
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    binding.swipeRefresh.isRefreshing = state.isLoading
-                    when {
-                        state.isLoading && state.repos.isEmpty() -> {
-                            binding.fullScreenLoader.visibility = View.VISIBLE
-                        }
+                viewModel.pagedRepos.collectLatest { pagingData ->
+                    binding.fullScreenLoader.visibility = View.GONE
+                    adapter.submitData(pagingData)
+                    binding.swipeRefresh.isRefreshing = false
+                }
+            }
+        }
 
-                        else -> {
-                            binding.fullScreenLoader.visibility = View.GONE
-                            adapter.submitList(state.repos)
-                        }
-                    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    binding.fullScreenLoader.visibility =
+                        if (state.isLoading) View.VISIBLE else View.GONE
                 }
             }
         }

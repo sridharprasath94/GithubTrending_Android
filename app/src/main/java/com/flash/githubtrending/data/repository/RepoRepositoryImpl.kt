@@ -1,8 +1,14 @@
 package com.flash.githubtrending.data.repository
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.flash.githubtrending.core.Result
 import com.flash.githubtrending.data.error.NetworkErrorMapper
 import com.flash.githubtrending.data.error.NetworkErrorMapper.toDomain
+import com.flash.githubtrending.data.local.AppDatabase
 import com.flash.githubtrending.data.local.dao.RepoDao
 import com.flash.githubtrending.data.local.entity.RepoEntity
 import com.flash.githubtrending.data.local.mapper.toDomain
@@ -16,8 +22,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,52 +30,34 @@ import kotlin.coroutines.cancellation.CancellationException
 
 @Singleton
 class RepoRepositoryImpl @Inject constructor(
+    private val database: AppDatabase,
     private val api: GithubApi,
     private val repoDao: RepoDao,
     private val ioDispatcher: CoroutineDispatcher
 ) : RepoRepository {
-    private val refreshMutex = Mutex()
-
-    override fun observeTrendingRepos(): Flow<List<Repo>> {
-        return repoDao.observeRepos()
-            .map { entities -> entities.map { it.toDomain() } }
-    }
-
     override fun observeFavoriteRepos(): Flow<List<Repo>> {
         return repoDao.observeFavoriteRepos()
             .map { entities -> entities.map { it.toDomain() } }
     }
 
-    override suspend fun refreshTrendingRepos(): Result<Unit> {
-        return withContext(ioDispatcher) {
-            refreshMutex.withLock {
-                try {
-                    val response: SearchReposResponseDto =
-                        api.getTrendingRepos(page = 1, perPage = 30)
-                    val favoriteIds = repoDao.getFavoriteIdsSet()
-                    val favoriteRepos = repoDao.observeFavoriteReposOnce()
-
-                    val entities: List<RepoEntity> = response.items
-                        .toDomainList()
-                        .applyFavorites(favoriteIds)
-                        .map { it.toEntity() }
-
-                    repoDao.clearRepos()
-                    repoDao.insertRepos(entities)
-
-                    // Re‑insert favorite repos that are not part of the trending list
-                    favoriteRepos
-                        .filter { fav -> entities.none { it.id == fav.id } }
-                        .map { it.toDomain().toEntity() }
-                        .let { repoDao.insertRepos(it) }
-
-                    Result.Success(Unit)
-
-                } catch (t: Throwable) {
-                    if (t is CancellationException) throw t
-                    Result.Error(NetworkErrorMapper.fromThrowable(t).toDomain())
-                }
-            }
+    @OptIn(ExperimentalPagingApi::class)
+    override fun observePagedTrendingRepos(): Flow<PagingData<Repo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 20,
+                prefetchDistance = 2,
+                enablePlaceholders = false,
+                maxSize = PagingConfig.MAX_SIZE_UNBOUNDED
+            ),
+            remoteMediator = RepoRemoteMediator(
+                api = api,
+                repoDao = repoDao,
+                database = database
+            ),
+            pagingSourceFactory = { repoDao.pagingSource() }
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
         }
     }
 
@@ -113,16 +99,17 @@ class RepoRepositoryImpl @Inject constructor(
         }
 }
 
-private suspend fun RepoDao.getFavoriteIdsSet(): Set<Long> {
+suspend fun RepoDao.getFavoriteIdsSet(): Set<Long> {
     return getFavoriteIds().toSet()
 }
 
-private fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
+fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
     return map { repo ->
         repo.copy(isFavorite = repo.id in favoriteIds)
     }
 }
 
-private suspend fun RepoDao.observeFavoriteReposOnce(): List<RepoEntity> {
+suspend fun RepoDao.observeFavoriteReposOnce(): List<RepoEntity> {
     return observeFavoriteRepos().first()
 }
+

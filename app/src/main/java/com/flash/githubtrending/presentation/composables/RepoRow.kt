@@ -1,4 +1,4 @@
-package com.flash.githubtrending.presentation.screens
+package com.flash.githubtrending.presentation.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
