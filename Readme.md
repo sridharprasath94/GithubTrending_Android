@@ -1,85 +1,104 @@
-
-
 # GitHub Trending
-Kotlin based Android application that showcases the **most popular trending repositories on GitHub**.  
-The project focuses on **clean architecture, scalable data flow, and modern Android development practices**.
 
-It demonstrates how to build a production-ready app using **Jetpack libraries, reactive data streams, offline caching, and paginated APIs**.
+GitHub Trending is a modern Android application that showcases the most popular repositories on GitHub.  
+The project demonstrates **modern Android development practices** including clean architecture, scalable data flow, offline caching, and paginated APIs.
+
+The goal of the project is to build a **production‑ready architecture** using Jetpack components while keeping the UI responsive and the data layer robust.
+
+---
+
+## Overview
+
+The application fetches trending repositories from the **GitHub Search API** and displays them in a smooth scrolling list.  
+Repositories can be marked as **favorites**, which are persisted locally and pinned to the top of the list.
+
+The project focuses on:
+
+- Modern Android architecture
+- Pagination with large datasets
+- Offline caching strategies
+- Clean separation of concerns
 
 ---
 
 ## Features
 
-- Browse trending GitHub repositories
-- Infinite scrolling with smooth pagination
-- Mark repositories as **favorites**
-- Favorites are **pinned to the top**
-- Offline cache using Room
-- Pull-to-refresh support
+- View trending GitHub repositories
+- Smooth infinite scrolling using Paging 3
+- Mark repositories as favorites
+- Favorites automatically appear at the top
+- Pull‑to‑refresh support
+- Offline caching with Room
 - Repository search functionality
-- Clean and responsive Material UI
+- Clean Material Design UI
 
 ---
 
 ## Architecture
 
-The project follows **Clean Architecture principles** with clear separation of responsibilities:
+The application follows **Clean Architecture + MVVM** principles to ensure scalability and maintainability.
 
 ```
-UI
-│
-├── ViewModel
-│
-├── UseCases (Domain Layer)
-│
-├── Repository
-│
-├── Local Data Source (Room)
-│
-└── Remote Data Source (GitHub API)
+UI (Compose / Views)
+        │
+        ▼
+    ViewModel
+        │
+        ▼
+UseCases (Domain Layer)
+        │
+        ▼
+     Repository
+   │           │
+   ▼           ▼
+Remote API   Local DB (Room)
 ```
 
-Key architectural concepts used:
+### Key Principles
 
-- MVVM architecture
-- Repository pattern
-- Use case driven domain layer
-- Single source of truth (Room database)
-- Dependency Injection with Hilt
+- **Single Source of Truth** using Room database
+- **Repository Pattern** for data abstraction
+- **UseCases** for business logic
+- **Dependency Injection with Hilt**
+- **Reactive data streams using Kotlin Flow**
 
 ---
 
 ## Tech Stack
 
-### Android
+### Language
 - Kotlin
-- Jetpack Compose
+
+### Android Architecture
+- MVVM
+- Clean Architecture
+- Repository Pattern
+
+### Jetpack Libraries
 - ViewModel
-- Navigation Component
+- Navigation
+- Paging 3
+- Room
 - Hilt Dependency Injection
 
-### Data & Networking
+### Networking
 - Retrofit
 - OkHttp
-- Room Database
+
+### Asynchronous Programming
 - Kotlin Coroutines
 - Kotlin Flow
 
-### Pagination
-- Paging 3
-- RemoteMediator
-- GitHub Search API
-
 ### UI
+- Jetpack Compose
 - Material Design 3
-- Compose Icons
-- Coil image loading
+- Coil (Image loading)
 
 ---
 
 ## Pagination Strategy
 
-Trending repositories are loaded using **Paging 3 with RemoteMediator**.
+The project uses **Paging 3 with RemoteMediator** to efficiently load repositories.
 
 ```
 GitHub API
@@ -88,21 +107,21 @@ GitHub API
 RemoteMediator
      │
      ▼
-Room Database (Source of Truth)
+Room Database
      │
      ▼
 PagingSource
      │
      ▼
-UI
+    UI
 ```
 
-This approach provides:
+Benefits of this approach:
 
 - Smooth infinite scrolling
-- Offline support
-- Consistent data source
-- Automatic retry and refresh
+- Offline-first experience
+- Reduced network requests
+- Reliable state restoration
 
 ---
 
@@ -110,21 +129,21 @@ This approach provides:
 
 Repositories are cached locally using **Room**.
 
-Benefits:
+Advantages:
 
-- Faster loading after first fetch
-- Offline browsing
-- Reduced API calls
+- Faster data loading
+- Offline access to previously loaded repositories
+- Reduced API usage
 
-Favorites are stored locally and **persist across refreshes**.
+Favorites are stored locally and remain persistent even after refreshing data.
 
 ---
 
 ## API
 
-The application uses the **GitHub Search API**.
+The application uses the **GitHub Search API** to fetch popular repositories.
 
-Example endpoint:
+Example request:
 
 ```
 https://api.github.com/search/repositories?q=stars:>10000&sort=stars&order=desc&page=1&per_page=20
@@ -158,15 +177,14 @@ app
 
 ## Future Improvements
 
-Planned enhancements for the project:
+Some potential improvements planned for the project:
 
-- Improved GitHub trending algorithm
 - Repository detail screen
+- Improved trending algorithms
+- UI enhancements and animations
 - Dark mode support
-- Advanced filtering
-- UI animations and polish
-- Better error handling and retry UI
-- GitHub authentication (optional)
-- Compose UI migration for all screens
+- Advanced filtering and sorting
+- Better error handling and retry mechanisms
+- Optional GitHub authentication
 
 ---
