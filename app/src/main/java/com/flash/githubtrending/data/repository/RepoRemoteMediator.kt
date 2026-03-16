@@ -34,8 +34,8 @@ class RepoRemoteMediator(
 
         val page = when (loadType) {
             LoadType.REFRESH -> {
-                currentPage = 0
-                0
+                currentPage = 1
+                1
             }
 
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -51,7 +51,7 @@ class RepoRemoteMediator(
             val response = api.getTrendingRepos(page = page, perPage = state.config.pageSize)
             Log.d(
                 "RepoPaging",
-                "Page: $page | PerPage=${response.items.size}"
+                "Page: $page | PerPage=${response.items.size}| nbPages=${response.items.count()}"
             )
             // Preserve existing favorites before refresh
             val favoriteIds = repoDao.getFavoriteIdsSet()
@@ -77,7 +77,16 @@ class RepoRemoteMediator(
                         .let { repoDao.insertRepos(it) }
                 }
             }
-            val endReached = response.items.isEmpty()
+
+            /**
+             * Stop paging if:
+             * 1. API returns empty results
+             * 2. We reached the GitHub 1000-result limit
+             */
+            val maxPage = 1000 / state.config.pageSize
+
+            val endReached =
+                response.items.isEmpty() || page >= maxPage
             Log.d(
                 "RepoPaging",
                 "EndReached=$endReached | nextPage=${if (endReached) "none" else page + 1}"
