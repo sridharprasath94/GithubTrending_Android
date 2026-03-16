@@ -1,16 +1,10 @@
 package com.flash.githubtrending.data.repository
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import androidx.paging.map
-import androidx.room.RoomDatabase
-import androidx.room.withTransaction
 import com.flash.githubtrending.core.Result
 import com.flash.githubtrending.data.error.NetworkErrorMapper
 import com.flash.githubtrending.data.error.NetworkErrorMapper.toDomain
@@ -28,8 +22,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -43,8 +35,6 @@ class RepoRepositoryImpl @Inject constructor(
     private val repoDao: RepoDao,
     private val ioDispatcher: CoroutineDispatcher
 ) : RepoRepository {
-    private val refreshMutex = Mutex()
-
     override fun observeFavoriteRepos(): Flow<List<Repo>> {
         return repoDao.observeFavoriteRepos()
             .map { entities -> entities.map { it.toDomain() } }
@@ -54,9 +44,11 @@ class RepoRepositoryImpl @Inject constructor(
     override fun observePagedTrendingRepos(): Flow<PagingData<Repo>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 30,
-                prefetchDistance = 10,
-                enablePlaceholders = false
+                pageSize = 20,
+                initialLoadSize = 20,
+                prefetchDistance = 2,
+                enablePlaceholders = false,
+                maxSize = PagingConfig.MAX_SIZE_UNBOUNDED
             ),
             remoteMediator = RepoRemoteMediator(
                 api = api,
@@ -66,39 +58,6 @@ class RepoRepositoryImpl @Inject constructor(
             pagingSourceFactory = { repoDao.pagingSource() }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }
-        }
-    }
-
-    override suspend fun refreshTrendingRepos(): Result<Unit> {
-        return withContext(ioDispatcher) {
-            refreshMutex.withLock {
-                try {
-                    val response: SearchReposResponseDto =
-                        api.getTrendingRepos(page = 1, perPage = 30)
-                    val favoriteIds = repoDao.getFavoriteIdsSet()
-                    val favoriteRepos = repoDao.observeFavoriteReposOnce()
-
-                    val entities: List<RepoEntity> = response.items
-                        .toDomainList()
-                        .applyFavorites(favoriteIds)
-                        .map { it.toEntity() }
-
-                    repoDao.clearRepos()
-                    repoDao.insertRepos(entities)
-
-                    // Re‑insert favorite repos that are not part of the trending list
-                    favoriteRepos
-                        .filter { fav -> entities.none { it.id == fav.id } }
-                        .map { it.toDomain().toEntity() }
-                        .let { repoDao.insertRepos(it) }
-
-                    Result.Success(Unit)
-
-                } catch (t: Throwable) {
-                    if (t is CancellationException) throw t
-                    Result.Error(NetworkErrorMapper.fromThrowable(t).toDomain())
-                }
-            }
         }
     }
 
@@ -140,81 +99,17 @@ class RepoRepositoryImpl @Inject constructor(
         }
 }
 
-private suspend fun RepoDao.getFavoriteIdsSet(): Set<Long> {
+suspend fun RepoDao.getFavoriteIdsSet(): Set<Long> {
     return getFavoriteIds().toSet()
 }
 
-private fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
+fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
     return map { repo ->
         repo.copy(isFavorite = repo.id in favoriteIds)
     }
 }
 
-private suspend fun RepoDao.observeFavoriteReposOnce(): List<RepoEntity> {
+suspend fun RepoDao.observeFavoriteReposOnce(): List<RepoEntity> {
     return observeFavoriteRepos().first()
 }
 
-
-@OptIn(ExperimentalPagingApi::class)
-class RepoRemoteMediator(
-    private val api: GithubApi,
-    private val repoDao: RepoDao,
-    private val database: RoomDatabase
-) : RemoteMediator<Int, RepoEntity>() {
-
-    override suspend fun load(
-        loadType: LoadType,
-        state: PagingState<Int, RepoEntity>
-    ): MediatorResult {
-
-        val page = when (loadType) {
-            LoadType.REFRESH -> 1
-            LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-            LoadType.APPEND -> {
-
-                val lastItem = state.lastItemOrNull()
-                    ?: return MediatorResult.Success(endOfPaginationReached = true)
-
-                val nextPage = (state.pages.sumOf { it.data.size } / state.config.pageSize) + 1
-                nextPage
-            }
-        }
-
-        return try {
-            Log.d("RepoAdapter", "Page: ${page}, Page count ${state.pages.size}")
-            val response = api.getTrendingRepos(page = page, perPage = state.config.pageSize)
-
-            // Preserve existing favorites before refresh
-            val favoriteIds = repoDao.getFavoriteIdsSet()
-            val favoriteRepos = repoDao.observeFavoriteReposOnce()
-
-            database.withTransaction {
-
-                if (loadType == LoadType.REFRESH) {
-                    repoDao.clearRepos()
-                }
-
-                val entities = response.items
-                    .toDomainList()
-                    .applyFavorites(favoriteIds)
-                    .map { it.toEntity() }
-
-                repoDao.insertRepos(entities)
-
-                // Only restore favorites during REFRESH to avoid invalidating Paging repeatedly
-                if (loadType == LoadType.REFRESH) {
-                    favoriteRepos
-                        .filter { fav -> entities.none { it.id == fav.id } }
-                        .let { repoDao.insertRepos(it) }
-                }
-            }
-
-            MediatorResult.Success(
-                endOfPaginationReached = response.items.isEmpty()
-            )
-
-        } catch (t: Throwable) {
-            MediatorResult.Error(t)
-        }
-    }
-}

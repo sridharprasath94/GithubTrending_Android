@@ -34,9 +34,6 @@ fun TrendingScreen(
 ) {
     val uiState : TrendingReposUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.refresh()
-    }
 
     var searchQuery by remember { mutableStateOf("") }
 

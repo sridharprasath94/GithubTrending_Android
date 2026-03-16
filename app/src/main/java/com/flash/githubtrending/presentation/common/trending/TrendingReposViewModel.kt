@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.flash.githubtrending.core.Result
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.usecase.ObservePagedTrendingReposUseCase
-import com.flash.githubtrending.domain.usecase.RefreshTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.SearchReposUseCase
 import com.flash.githubtrending.domain.usecase.ToggleFavouritesUseCase
 import com.flash.githubtrending.presentation.error.UIError
@@ -31,7 +30,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TrendingReposViewModel @Inject constructor(
     observePagedTrendingReposUseCase: ObservePagedTrendingReposUseCase,
-    private val refreshTrendingRepos: RefreshTrendingReposUseCase,
     private val searchReposUseCase: SearchReposUseCase,
     private val toggleFavouritesUseCase: ToggleFavouritesUseCase
 ) : ViewModel() {
@@ -56,7 +54,6 @@ class TrendingReposViewModel @Inject constructor(
                     }
                 }
         }
-        refresh()
     }
 
     val pagedRepos: Flow<PagingData<Repo>> =
@@ -81,23 +78,6 @@ class TrendingReposViewModel @Inject constructor(
             initialValue = TrendingReposUiState()
         )
 
-    fun refresh() {
-        viewModelScope.launch {
-            _searchResults.value = null
-            _isLoading.value = true
-
-            when (val result = refreshTrendingRepos()) {
-                is Result.Success -> {
-                    _isLoading.value = false
-                }
-
-                is Result.Error -> {
-                    _isLoading.value = false
-                    _events.emit(UIError.from(result.error))
-                }
-            }
-        }
-    }
 
     private suspend fun performSearch(query: String) {
         if (query.isBlank()) {

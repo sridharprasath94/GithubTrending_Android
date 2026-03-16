@@ -4,6 +4,7 @@ package com.flash.githubtrending.presentation.xml.trending
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentTrendingBinding
 import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
+import com.flash.githubtrending.presentation.utils.fastSmoothScrollToTop
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import dev.androidbroadcast.vbpd.viewBinding
@@ -36,6 +38,22 @@ class TrendingReposFragment :
         observeUiState()
         observeEvents()
         observeSearchField()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
+                    val firstVisible = layoutManager.findFirstVisibleItemPosition()
+
+                    if (firstVisible > 0) {
+                        binding.recyclerView.fastSmoothScrollToTop()
+                    } else {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            }
+        )
     }
 
     @OptIn(FlowPreview::class)
