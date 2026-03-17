@@ -31,31 +31,24 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField(
-            "String",
-            "GITHUB_TOKEN",
-            "\"$githubToken\""
-        )
-
-        buildTypes {
-            debug {
-                buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
-            }
-            release {
-                buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
-            }
-        }
     }
 
 
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
+            buildConfigField("String", "GITHUB_TOKEN", "\"$githubToken\"")
+        }
+        release {
+            isMinifyEnabled = true
+            buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
+            buildConfigField("String", "GITHUB_TOKEN", "\"\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
