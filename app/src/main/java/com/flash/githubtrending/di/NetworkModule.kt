@@ -20,9 +20,11 @@ object NetworkModule {
     @Singleton
     fun provideOkHttp(): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(
-                AuthInterceptor(BuildConfig.GITHUB_TOKEN)
-            )
+            .apply {
+                if (BuildConfig.GITHUB_TOKEN.isNotEmpty()) {
+                    addInterceptor(AuthInterceptor(BuildConfig.GITHUB_TOKEN))
+                }
+            }
             .build()
     }
     @Provides
