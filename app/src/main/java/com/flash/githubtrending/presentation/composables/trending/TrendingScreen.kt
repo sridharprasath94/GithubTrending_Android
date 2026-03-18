@@ -32,7 +32,7 @@ fun TrendingScreen(
     onRepoClick: (String) -> Unit,
     viewModel: TrendingReposViewModel = hiltViewModel()
 ) {
-    val uiState : TrendingReposUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState : TrendingReposUiState by viewModel.state.collectAsStateWithLifecycle()
 
 
     var searchQuery by remember { mutableStateOf("") }
@@ -68,23 +68,23 @@ fun TrendingScreen(
                 )
             )
 
-            if (uiState.isLoading && uiState.repos.isEmpty()) {
-                CircularProgressIndicator()
-            } else {
-                LazyColumn {
-                    items(uiState.repos) { repo ->
-                        RepoRow(
-                            repo = repo,
-                            onRepoClick = {
-                                onRepoClick(repo.name)
-                            },
-                            onToggleFavorite = {
-                                viewModel.toggleFavorite(repo)
-                            }
-                        )
-                    }
-                }
-            }
+//            if (uiState.isLoading && uiState.repos.isEmpty()) {
+//                CircularProgressIndicator()
+//            } else {
+//                LazyColumn {
+//                    items(uiState.repos) { repo ->
+//                        RepoRow(
+//                            repo = repo,
+//                            onRepoClick = {
+//                                onRepoClick(repo.name)
+//                            },
+//                            onToggleFavorite = {
+//                                viewModel.toggleFavorite(repo)
+//                            }
+//                        )
+//                    }
+//                }
+//            }
         }
     }
 }

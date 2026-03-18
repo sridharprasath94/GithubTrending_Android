@@ -90,7 +90,7 @@ class TrendingReposFragment :
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.pagedRepos.collectLatest { pagingData ->
+                viewModel.repoFlow.collectLatest { pagingData ->
                     binding.fullScreenLoader.visibility = View.GONE
                     adapter.submitData(pagingData)
                     binding.swipeRefresh.isRefreshing = false
@@ -100,7 +100,7 @@ class TrendingReposFragment :
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
+                viewModel.state.collect { state ->
                     binding.fullScreenLoader.visibility =
                         if (state.isLoading) View.VISIBLE else View.GONE
                 }
@@ -115,7 +115,6 @@ class TrendingReposFragment :
                     Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT)
                         .show()
                 }
-
             }
         }
     }
