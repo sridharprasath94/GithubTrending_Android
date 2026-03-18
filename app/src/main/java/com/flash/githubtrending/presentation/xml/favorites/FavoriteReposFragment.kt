@@ -13,6 +13,7 @@ import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentFavoritesBinding
+import com.flash.githubtrending.presentation.common.favorites.FavoriteReposUiState
 import com.flash.githubtrending.presentation.common.favorites.FavoriteReposViewModel
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,9 +30,9 @@ class FavoriteReposFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
-        observeUiState()
+        observeState()
+
     }
 
 
@@ -50,18 +51,25 @@ class FavoriteReposFragment :
         }
     }
 
-    private fun observeUiState() {
+    private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when {
-                        state.isLoading && state.repos.isEmpty() -> {
-                            binding.fullScreenLoader.visibility = View.VISIBLE
+                viewModel.state.collect { state ->
+                    when (state) {
+                        FavoriteReposUiState.Empty -> {
+                            binding.fullScreenLoader.visibility = View.GONE
+                            binding.recyclerView.visibility = View.GONE
                         }
 
-                        else -> {
+                        is FavoriteReposUiState.Success -> {
                             binding.fullScreenLoader.visibility = View.GONE
+                            binding.recyclerView.visibility = View.VISIBLE
                             adapter.submitData(PagingData.from(state.repos))
+                        }
+
+                        FavoriteReposUiState.Loading -> {
+                            binding.fullScreenLoader.visibility = View.VISIBLE
+                            binding.recyclerView.visibility = View.GONE
                         }
                     }
                 }

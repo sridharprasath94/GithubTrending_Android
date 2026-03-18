@@ -7,6 +7,8 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import coil.load
 import com.flash.githubtrending.R
@@ -14,12 +16,9 @@ import com.flash.githubtrending.databinding.FragmentDetailsBinding
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.presentation.common.details.RepoDetailsUiState
 import com.flash.githubtrending.presentation.common.details.RepoDetailsViewModel
-import dev.androidbroadcast.vbpd.viewBinding
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textview.MaterialTextView
+import com.flash.githubtrending.presentation.utils.showCenteredSnackBar
 import dagger.hilt.android.AndroidEntryPoint
+import dev.androidbroadcast.vbpd.viewBinding
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -33,7 +32,11 @@ class RepoDetailsFragment :
         val repoId = args.repoId
 
         viewModel.loadRepo(repoId)
+        observeState()
+        observeEvent()
+    }
 
+    private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
@@ -48,7 +51,9 @@ class RepoDetailsFragment :
                 }
             }
         }
+    }
 
+    private fun observeEvent() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
@@ -97,16 +102,4 @@ class RepoDetailsFragment :
             }
         }
     }
-}
-
-fun View.showCenteredSnackBar(message: String) {
-    val snackBar = Snackbar.make(this, message, Snackbar.LENGTH_SHORT)
-
-    val textView = snackBar.view.findViewById<MaterialTextView>(
-        com.google.android.material.R.id.snackbar_text
-    )
-    textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-    textView.gravity = android.view.Gravity.CENTER
-
-    snackBar.show()
 }
