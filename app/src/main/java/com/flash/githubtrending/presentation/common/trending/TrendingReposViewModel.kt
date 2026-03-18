@@ -84,6 +84,7 @@ class TrendingReposViewModel @Inject constructor(
                 it.copy(isLoading = true)
             }
             searchReposUseCase(query)
+                .cachedIn(viewModelScope)
                 .collectLatest { pagingData ->
                     _searchResults.value = pagingData
                     _state.update {
