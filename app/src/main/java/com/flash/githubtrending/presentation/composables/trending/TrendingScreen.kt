@@ -10,7 +10,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,17 +35,12 @@ fun TrendingScreen(
 
     var searchQuery by remember { mutableStateOf("") }
 
-    LaunchedEffect(searchQuery) {
-        if (searchQuery.isBlank()) {
-            viewModel.clearSearch()
-        }
-    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = {
@@ -61,23 +55,30 @@ fun TrendingScreen(
                 )
             )
 
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                LazyColumn {
-                    items(lazyPagingItems.itemCount) { index ->
-                        val repo = lazyPagingItems[index]
-                        repo?.let { it ->
-                            RepoRow(
-                                repo = it,
-                                onRepoClick = {
-                                    onRepoClick(it.name)
-                                },
-                                onToggleFavorite = {
-                                    viewModel.toggleFavorite(it)
-                                    lazyPagingItems.refresh()
-                                }
-                            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(lazyPagingItems.itemCount) { index ->
+                            val repo = lazyPagingItems[index]
+                            repo?.let { it ->
+                                RepoRow(
+                                    repo = it,
+                                    onRepoClick = {
+                                        onRepoClick(it.name)
+                                    },
+                                    onToggleFavorite = {
+                                        viewModel.toggleFavorite(it)
+                                        lazyPagingItems.refresh()
+                                    }
+                                )
+                            }
                         }
                     }
                 }
