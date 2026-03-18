@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.Flow
 interface RepoRepository {
     fun observePagedTrendingRepos() : Flow<PagingData<Repo>>
 
-    suspend fun searchRepos(query: String): Result<List<Repo>>
-
-    suspend fun toggleFavorite(repo: Repo) : Result<Unit>
+    fun observeSearchRepos(query: String): Flow<PagingData<Repo>>
 
     fun observeFavoriteRepos(): Flow<List<Repo>>
+
+    suspend fun toggleFavorite(repo: Repo) : Result<Unit>
 }

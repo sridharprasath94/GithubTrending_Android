@@ -13,10 +13,8 @@ import com.flash.githubtrending.data.local.dao.RepoDao
 import com.flash.githubtrending.data.local.mapper.toDomain
 import com.flash.githubtrending.data.local.mapper.toEntity
 import com.flash.githubtrending.data.remote.api.GithubApi
-import com.flash.githubtrending.data.remote.dto.SearchReposResponseDto
-import com.flash.githubtrending.data.remote.dto.toDomainList
 import com.flash.githubtrending.data.remote.paging.RepoRemoteMediator
-import com.flash.githubtrending.data.utils.*
+import com.flash.githubtrending.data.remote.paging.RepoSearchPagingSource
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.repository.RepoRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -61,24 +59,24 @@ class RepoRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchRepos(query: String): Result<List<Repo>> =
-        withContext(ioDispatcher) {
-            try {
-                val response: SearchReposResponseDto =
-                    api.searchRepos(query = query, page = 1, perPage = 30)
-                val favoriteIds = repoDao.getFavoriteIdsSet()
-
-                val repos = response.items
-                    .toDomainList()
-                    .applyFavorites(favoriteIds)
-
-                Result.Success(repos)
-
-            } catch (t: Throwable) {
-                if (t is CancellationException) throw t
-                Result.Error(NetworkErrorMapper.fromThrowable(t).toDomain())
+    @OptIn(ExperimentalPagingApi::class)
+    override fun observeSearchRepos(query: String): Flow<PagingData<Repo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 20,
+                prefetchDistance = 2,
+                enablePlaceholders = false,
+            ),
+            pagingSourceFactory = {
+                RepoSearchPagingSource(
+                    api = api,
+                    query = query,
+                    repoDao = repoDao,
+                )
             }
-        }
+        ).flow
+    }
 
     override suspend fun toggleFavorite(repo: Repo): Result<Unit> =
         withContext(ioDispatcher) {
