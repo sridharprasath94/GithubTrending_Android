@@ -10,18 +10,17 @@ import com.flash.githubtrending.data.error.NetworkErrorMapper
 import com.flash.githubtrending.data.error.NetworkErrorMapper.toDomain
 import com.flash.githubtrending.data.local.AppDatabase
 import com.flash.githubtrending.data.local.dao.RepoDao
-import com.flash.githubtrending.data.local.entity.RepoEntity
 import com.flash.githubtrending.data.local.mapper.toDomain
 import com.flash.githubtrending.data.local.mapper.toEntity
 import com.flash.githubtrending.data.remote.api.GithubApi
 import com.flash.githubtrending.data.remote.dto.SearchReposResponseDto
 import com.flash.githubtrending.data.remote.dto.toDomainList
 import com.flash.githubtrending.data.remote.paging.RepoRemoteMediator
+import com.flash.githubtrending.data.utils.*
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.repository.RepoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -100,17 +99,4 @@ class RepoRepositoryImpl @Inject constructor(
         }
 }
 
-suspend fun RepoDao.getFavoriteIdsSet(): Set<Long> {
-    return getFavoriteIds().toSet()
-}
-
-fun List<Repo>.applyFavorites(favoriteIds: Set<Long>): List<Repo> {
-    return map { repo ->
-        repo.copy(isFavorite = repo.id in favoriteIds)
-    }
-}
-
-suspend fun RepoDao.observeFavoriteReposOnce(): List<RepoEntity> {
-    return observeFavoriteRepos().first()
-}
 

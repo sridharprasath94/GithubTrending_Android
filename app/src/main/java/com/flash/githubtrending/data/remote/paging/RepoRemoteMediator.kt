@@ -12,9 +12,7 @@ import com.flash.githubtrending.data.local.entity.RepoEntity
 import com.flash.githubtrending.data.local.mapper.toEntity
 import com.flash.githubtrending.data.remote.api.GithubApi
 import com.flash.githubtrending.data.remote.dto.toDomainList
-import com.flash.githubtrending.data.repository.applyFavorites
-import com.flash.githubtrending.data.repository.getFavoriteIdsSet
-import com.flash.githubtrending.data.repository.observeFavoriteReposOnce
+import com.flash.githubtrending.data.utils.*
 
 @OptIn(ExperimentalPagingApi::class)
 class RepoRemoteMediator(
