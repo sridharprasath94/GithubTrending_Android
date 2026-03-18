@@ -11,21 +11,21 @@ data class SearchReposResponseDto(
 )
 
 data class RepoDto(
-    val id: Long,
-    val name: String,
-    @SerializedName("full_name") val fullName: String,
+    val id: Long?,
+    val name: String?,
+    @SerializedName("full_name") val fullName: String?,
     val description: String?,
-    @SerializedName("stargazers_count") val stars: Int,
-    val forks: Int,
+    @SerializedName("stargazers_count") val stars: Int?,
+    val forks: Int?,
     val language: String?,
-    @SerializedName("html_url") val htmlUrl: String,
-    val owner: OwnerDto
+    @SerializedName("html_url") val htmlUrl: String?,
+    val owner: OwnerDto?
 )
 
 data class OwnerDto(
-    @SerializedName("login") val login: String,
-    @SerializedName("avatar_url") val avatarUrl: String,
-    @SerializedName("html_url") val htmlUrl: String
+    @SerializedName("login") val login: String?,
+    @SerializedName("avatar_url") val avatarUrl: String?,
+    @SerializedName("html_url") val htmlUrl: String?
 )
 
 /**
@@ -33,17 +33,17 @@ data class OwnerDto(
  */
 fun RepoDto.toDomain(isFavorite: Boolean = false): Repo {
     return Repo(
-        id = id,
-        name = name,
-        fullName = fullName,
+        id = id ?: -1L,
+        name = name.orEmpty(),
+        fullName = fullName.orEmpty(),
         description = description,
-        stars = stars,
-        forks = forks,
+        stars = stars ?: 0,
+        forks = forks ?: 0,
         language = language,
-        ownerName = owner.login,
-        ownerAvatarUrl = owner.avatarUrl,
-        ownerHtmlUrl = owner.htmlUrl,
-        repoHtmlUrl = htmlUrl,
+        ownerName = owner?.login.orEmpty(),
+        ownerAvatarUrl = owner?.avatarUrl,
+        ownerHtmlUrl = owner?.htmlUrl.orEmpty(),
+        repoHtmlUrl = htmlUrl.orEmpty(),
         isFavorite = isFavorite
     )
 }

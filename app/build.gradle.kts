@@ -38,7 +38,7 @@ android {
         debug {
             isMinifyEnabled = false
             buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
-            buildConfigField("String", "GITHUB_TOKEN", "\"\"")
+            buildConfigField("String", "GITHUB_TOKEN", "\"$githubToken\"")
         }
         release {
             isMinifyEnabled = true

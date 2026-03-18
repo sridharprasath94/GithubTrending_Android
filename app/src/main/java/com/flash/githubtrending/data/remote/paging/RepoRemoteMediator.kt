@@ -47,7 +47,7 @@ class RepoRemoteMediator(
         }
         Log.d("RepoPaging", "LoadType=$loadType | page=$page | mediatorPage=$currentPage")
         return try {
-            Log.d("RepoAdapter", "Page: ${page}, Page count ${state.pages.size}")
+            Log.d("RepoPaging", "Page: ${page}, Page count ${state.pages.size}")
             val response = api.getTrendingRepos(page = page, perPage = state.config.pageSize)
             Log.d(
                 "RepoPaging",
@@ -96,6 +96,7 @@ class RepoRemoteMediator(
             )
 
         } catch (t: Throwable) {
+            Log.e("RepoPaging", "Error occurred", t)
             MediatorResult.Error(t)
         }
     }
