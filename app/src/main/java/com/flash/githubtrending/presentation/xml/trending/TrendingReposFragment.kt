@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.flash.githubtrending.R
 import com.flash.githubtrending.databinding.FragmentTrendingBinding
+import com.flash.githubtrending.presentation.common.trending.TrendingReposUiState
 import com.flash.githubtrending.presentation.common.trending.TrendingReposViewModel
 import com.flash.githubtrending.presentation.utils.fastSmoothScrollToTop
 import com.flash.githubtrending.presentation.xml.shared.RepoAdapter
@@ -101,8 +102,12 @@ class TrendingReposFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
-                    binding.fullScreenLoader.visibility =
-                        if (state.isLoading) View.VISIBLE else View.GONE
+                    when (state) {
+                        TrendingReposUiState.Loading -> binding.fullScreenLoader.visibility =
+                            View.VISIBLE
+
+                        TrendingReposUiState.Idle -> binding.fullScreenLoader.visibility = View.GONE
+                    }
                 }
             }
         }
