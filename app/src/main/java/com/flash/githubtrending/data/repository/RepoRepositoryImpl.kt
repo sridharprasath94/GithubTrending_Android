@@ -16,6 +16,7 @@ import com.flash.githubtrending.data.local.mapper.toEntity
 import com.flash.githubtrending.data.remote.api.GithubApi
 import com.flash.githubtrending.data.remote.dto.SearchReposResponseDto
 import com.flash.githubtrending.data.remote.dto.toDomainList
+import com.flash.githubtrending.data.remote.paging.RepoRemoteMediator
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.repository.RepoRepository
 import kotlinx.coroutines.CoroutineDispatcher
