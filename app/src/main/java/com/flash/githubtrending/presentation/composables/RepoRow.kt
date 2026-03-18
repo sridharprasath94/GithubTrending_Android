@@ -14,6 +14,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,6 +31,10 @@ fun RepoRow(
     onToggleFavorite: (Repo) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isFavorite by remember(repo.fullName, repo.isFavorite) {
+        mutableStateOf(repo.isFavorite)
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -45,11 +53,14 @@ fun RepoRow(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        IconButton(onClick = { onToggleFavorite(repo) }) {
+        IconButton(onClick = {
+            isFavorite = !isFavorite   // optimistic toggle
+            onToggleFavorite(repo)
+        }) {
             Icon(
-                imageVector = if (repo.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                contentDescription = if (repo.isFavorite) "Remove from favorites" else "Add to favorites",
-                tint = if (repo.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

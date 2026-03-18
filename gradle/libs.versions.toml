@@ -83,6 +83,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 # Core - Paging
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "roomPaging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
 # Utilities
 dev-android-broadcast-vbpd = { group = "dev.androidbroadcast.vbpd", name = "vbpd", version.ref = "vbpd" }
