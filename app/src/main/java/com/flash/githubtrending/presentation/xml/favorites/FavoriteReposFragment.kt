@@ -44,7 +44,7 @@ class FavoriteReposFragment :
         adapter.setOnItemClickListener { repo ->
             val action =
                 FavoriteReposFragmentDirections
-                    .actionFavoritesToDetails(repo)
+                    .actionFavoritesToDetails(repo.id)
 
             findNavController().navigate(action)
         }

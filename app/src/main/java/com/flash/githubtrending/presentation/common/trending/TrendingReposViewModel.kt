@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.flash.githubtrending.core.Result
+import com.flash.githubtrending.core.RepoResult
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.usecase.ObservePagedTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.SearchReposUseCase
@@ -98,10 +98,10 @@ class TrendingReposViewModel @Inject constructor(
     fun toggleFavorite(repo: Repo) {
         viewModelScope.launch {
             when (val result = toggleFavouritesUseCase(repo)) {
-                is Result.Success -> {
+                is RepoResult.Success -> {
                 }
 
-                is Result.Error -> {
+                is RepoResult.Error -> {
                     _events.emit(UIError.from(result.error))
                 }
             }

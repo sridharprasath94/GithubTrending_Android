@@ -5,7 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.flash.githubtrending.core.Result
+import com.flash.githubtrending.core.RepoResult
 import com.flash.githubtrending.data.error.NetworkErrorMapper
 import com.flash.githubtrending.data.error.NetworkErrorMapper.toDomain
 import com.flash.githubtrending.data.local.AppDatabase
@@ -15,6 +15,7 @@ import com.flash.githubtrending.data.local.mapper.toEntity
 import com.flash.githubtrending.data.remote.api.GithubApi
 import com.flash.githubtrending.data.remote.paging.RepoRemoteMediator
 import com.flash.githubtrending.data.remote.paging.RepoSearchPagingSource
+import com.flash.githubtrending.domain.error.DomainError
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.repository.RepoRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,6 +37,17 @@ class RepoRepositoryImpl @Inject constructor(
     override fun observeFavoriteRepos(): Flow<List<Repo>> {
         return repoDao.observeFavoriteRepos()
             .map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override suspend fun getRepoById(id: Long): RepoResult<Repo> {
+        return withContext(ioDispatcher) {
+            val repo = repoDao.getRepoById(id)?.toDomain()
+            if (repo != null) {
+                RepoResult.Success(repo)
+            } else {
+                RepoResult.Error(DomainError.RepoNotFoundError)
+            }
+        }
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -78,7 +90,7 @@ class RepoRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override suspend fun toggleFavorite(repo: Repo): Result<Unit> =
+    override suspend fun toggleFavorite(repo: Repo): RepoResult<Unit> =
         withContext(ioDispatcher) {
             try {
                 val existing = repoDao.getRepoById(repo.id)
@@ -88,11 +100,11 @@ class RepoRepositoryImpl @Inject constructor(
 
                 repoDao.toggleFavorite(repo.id)
 
-                Result.Success(Unit)
+                RepoResult.Success(Unit)
 
             } catch (t: Throwable) {
                 if (t is CancellationException) throw t
-                Result.Error(NetworkErrorMapper.fromThrowable(t).toDomain())
+                RepoResult.Error(NetworkErrorMapper.fromThrowable(t).toDomain())
             }
         }
 }

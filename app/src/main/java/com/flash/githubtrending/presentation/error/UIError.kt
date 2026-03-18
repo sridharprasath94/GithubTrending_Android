@@ -3,6 +3,7 @@ package com.flash.githubtrending.presentation.error
 import com.flash.githubtrending.domain.error.DomainError
 
 sealed class UIError(val message: String) {
+    object RepoNotFoundError : UIError("Repo is not found")
 
     object NoInternet : UIError("No internet connection. Please check your network.")
 
@@ -16,6 +17,7 @@ sealed class UIError(val message: String) {
 
         fun from(domainError: DomainError): UIError {
             return when (domainError) {
+                DomainError.RepoNotFoundError -> RepoNotFoundError
                 DomainError.NetworkUnavailable -> NoInternet
                 DomainError.RateLimitExceeded -> RateLimited
                 DomainError.InvalidRequest -> BadRequest

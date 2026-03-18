@@ -32,8 +32,8 @@
         android:id="@+id/detailsFragment"
         android:name="com.flash.githubtrending.presentation.xml.details.RepoDetailsFragment">
         <argument
-            android:name="repo"
-            app:argType="com.flash.githubtrending.domain.model.Repo" />
+            android:name="repoId"
+            app:argType="long" />
     </fragment>
 
 </navigation>
