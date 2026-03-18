@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.flash.githubtrending.core.Result
+import com.flash.githubtrending.core.RepoResult
 import com.flash.githubtrending.domain.model.Repo
 import com.flash.githubtrending.domain.usecase.ObservePagedTrendingReposUseCase
 import com.flash.githubtrending.domain.usecase.SearchReposUseCase
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,7 +33,7 @@ class TrendingReposViewModel @Inject constructor(
     private val searchReposUseCase: SearchReposUseCase,
     private val toggleFavouritesUseCase: ToggleFavouritesUseCase
 ) : ViewModel() {
-    private val _state = MutableStateFlow(TrendingReposUiState())
+    private val _state = MutableStateFlow<TrendingReposUiState>(TrendingReposUiState.Idle)
     val state: StateFlow<TrendingReposUiState> = _state.asStateFlow()
     private val _searchResults = MutableStateFlow<PagingData<Repo>?>(null)
     private val _events = MutableSharedFlow<UIError>()
@@ -80,16 +79,12 @@ class TrendingReposViewModel @Inject constructor(
         searchJob?.cancel()
 
         searchJob = viewModelScope.launch {
-            _state.update {
-                it.copy(isLoading = true)
-            }
+            _state.value = TrendingReposUiState.Loading
             searchReposUseCase(query)
                 .cachedIn(viewModelScope)
                 .collectLatest { pagingData ->
                     _searchResults.value = pagingData
-                    _state.update {
-                        it.copy(isLoading = false)
-                    }
+                    _state.value = TrendingReposUiState.Idle
                 }
         }
 
@@ -98,10 +93,10 @@ class TrendingReposViewModel @Inject constructor(
     fun toggleFavorite(repo: Repo) {
         viewModelScope.launch {
             when (val result = toggleFavouritesUseCase(repo)) {
-                is Result.Success -> {
+                is RepoResult.Success -> {
                 }
 
-                is Result.Error -> {
+                is RepoResult.Error -> {
                     _events.emit(UIError.from(result.error))
                 }
             }
@@ -110,9 +105,7 @@ class TrendingReposViewModel @Inject constructor(
 
     fun clearSearch() {
         _searchResults.value = null
-        _state.update {
-            it.copy(isLoading = false)
-        }
+        _state.value = TrendingReposUiState.Idle
     }
 
     fun onSearchQueryChanged(query: String) {

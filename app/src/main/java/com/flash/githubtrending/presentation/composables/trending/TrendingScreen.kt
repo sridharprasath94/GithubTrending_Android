@@ -59,7 +59,7 @@ fun TrendingScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (uiState.isLoading) {
+                if (uiState == TrendingReposUiState.Loading) {
                     CircularProgressIndicator()
                 } else {
                     LazyColumn(

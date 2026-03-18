@@ -2,7 +2,8 @@ package com.flash.githubtrending.presentation.common.favorites
 
 import com.flash.githubtrending.domain.model.Repo
 
-data class FavoriteReposUiState(
-    val isLoading: Boolean = false,
-    val repos: List<Repo> = emptyList()
-)
+sealed class FavoriteReposUiState {
+    object Empty : FavoriteReposUiState()
+    object Loading : FavoriteReposUiState()
+    data class Success(val repos: List<Repo>) : FavoriteReposUiState()
+}
